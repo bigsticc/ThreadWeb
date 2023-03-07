@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="ThreadWeb" default="docker-all">
+    <property file="build.properties"/>
+
+    <path id="threadweb.path">
+        <pathelement path="${build}"/>
+    </path>
+
+    <path id="junit.libs.path">
+        <fileset dir="lib/test"/>
+    </path>
+
+    <target name="init">
+        <tstamp/>
+        <mkdir dir="${build}"/>
+        <mkdir dir="${build.client}"/>
+        <mkdir dir="${build.package}"/>
+        <mkdir dir="${test.build}"/>
+        <mkdir dir="${test.output}"/>
+        <mkdir dir="${test.reports}"/>
+    </target>
+
+    <target name="compile" depends="init">
+        <javac srcdir="${src.main}" destdir="${build}" includeantruntime="false"/>
+    </target>
+
+    <target name="compile-client" depends="compile">
+        <javac srcdir="client" destdir="${build.client}" includeantruntime="false"/>
+    </target>
+
+    <target name="test" depends="compile">
+        <javac srcdir="${src.test}" destdir="${test.build}" includeantruntime="false">
+            <classpath refid="junit.libs.path"/>
+            <classpath refid="threadweb.path"/>
+        </javac>
+        <junitlauncher printSummary="true">
+            <classpath refid="junit.libs.path"/>
+            <classpath refid="threadweb.path"/>
+
+            <classpath>
+                <pathelement location="${test.build}"/>
+            </classpath>
+            <testclasses outputdir="${test.output}">
+                <fileset dir="${test.build}"/>
+                <listener type="legacy-xml" sendSysErr="true" sendSysOut="true"/>
+            </testclasses>
+        </junitlauncher>
+        <junitreport todir="${test.output}">
+            <fileset dir="${test.output}" includes="TEST-*.xml"/>
+            <report format="frames" todir="${test.reports}"/>
+        </junitreport>
+    </target>
+
+    <target name="package" depends="compile,compile-client,test">
+        <jar destfile="${build.package}/ThreadWeb-${DSTAMP}.jar" basedir="${build}">
+            <manifest>
+                <attribute name="Main-Class" value="Main"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="docker-single" depends="package">
+        <exec executable="docker">
+            <arg value="build"/>
+            <arg value="-t"/>
+            <arg value="threadweb-singleserver:latest"/>
+            <arg value="-f"/>
+            <arg value="Dockerfile.single"/>
+            <arg value="."/>
+        </exec>
+    </target>
+    <target name="docker-multi" depends="package">
+        <exec executable="docker">
+            <arg value="build"/>
+            <arg value="-t"/>
+            <arg value="threadweb-multiserver:latest"/>
+            <arg value="-f"/>
+            <arg value="Dockerfile.multi"/>
+            <arg value="."/>
+        </exec>
+    </target>
+
+    <target name="docker-all" depends="docker-single,docker-multi"/>
+
+    <target name="execute-client" depends="compile-client">
+        <java classname="Client" dir="${build.client}" fork="true"/>
+    </target>
+
+
+    <target name="clean">
+        <delete dir="build"/>
+        <delete dir="test-build"/>
+    </target>
+</project>

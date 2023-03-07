@@ -1,0 +1,9 @@
+FROM openjdk:17-oracle
+
+COPY build/package/ThreadWeb-*.jar /app/ThreadWeb.jar
+COPY res /app/res
+WORKDIR /app
+
+EXPOSE 80
+
+ENTRYPOINT [ "java", "-jar", "ThreadWeb.jar", "--parallel"]
