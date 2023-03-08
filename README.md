@@ -16,5 +16,5 @@ Then to run the experiment, complete these steps:
     To run the multithreaded server, run `$ docker run -d -p 80:80 --name ThreadWeb-Multi threadweb-multiserver:latest` <br>
     To run the single threaded server, run `$ docker run -d -p 80:80 --name ThreadWeb-Single threadweb-singleserver:latest`
 2. Run `$ ant execute-client` to complete a trial for the experiment (do 3 or more trials and average them)
-3. Repeat step 4 and 5 with the other server
+3. Repeat step 1 and 2 with the other server
 4. Run `$ ant clean` to remove build artifacts, and run `$ docker rmi threadweb-multiserver threadweb-singleserver` to remove the server artifacts
