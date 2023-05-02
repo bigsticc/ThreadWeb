@@ -7,13 +7,19 @@ import java.nio.channels.SocketChannel;
 import java.util.Set;
 
 public class ClientHandler extends Thread implements Handler {
+    // Client to be handled
     SelectionKey key;
+    
+    // "Sync-set" of keys currently being handled, used by the server to prevent multiple threads from being dispatched
     Set<SelectionKey> handled;
+    
+    // Constructor to initialize a ClientHandler
     public ClientHandler(SelectionKey key, Set<SelectionKey> handled) {
         this.key = key;
         this.handled = handled;
     }
 
+    // Main method to handle a client
     @Override
     public void run() {
         try(SocketChannel client = (SocketChannel)key.channel()) {
@@ -21,13 +27,13 @@ public class ClientHandler extends Thread implements Handler {
             ByteBuffer in = ByteBuffer.allocate(1024);
             ByteBuffer out = ByteBuffer.allocate(30000);
             
-            // reading the request, and processing a response
+            // Reading the request, and processing a response
             client.read(in);
             in.flip();
             process(in, out);
             client.write(out);
 
-            // removing the client from the sync-set
+            // Removing the client from the sync-set
             handled.remove(key);
         } catch(IOException e) {
             e.printStackTrace();

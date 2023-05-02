@@ -78,15 +78,20 @@ public enum MimeType {
     _3g2("video/3gpp2"),
     _7z("application/x-7z-compressed");
 
+    // String representing the MIME Identifier of a file type
     final String mime;
 
+    // Private constructor for filling in properties
     MimeType(String mime) {
       this.mime = mime;
     }
 
+    // Return the MIME Identifier for a file extension
     public String getMime() {
       return mime;
     }
+    
+    // Get a MimeType by the MIME Identifier
     public static String getByMime(String mime) {
       for(MimeType m : MimeType.values()) {
         if(m.getMime().equals(mime)) return mime;
